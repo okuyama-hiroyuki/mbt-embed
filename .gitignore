@@ -1,5 +1,7 @@
 # Build output
 _build/
+result
+result-*
 
 # Dependencies
 .mooncakes/

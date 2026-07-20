@@ -1,0 +1,13 @@
+{
+  "name": "nixos/mbt-embed",
+  "version": "0.1.0",
+  "readme": "README.mbt.md",
+  "repository": "",
+  "license": "Apache-2.0",
+  "keywords": ["embed", "codegen", "assets"],
+  "preferred-target": "native",
+  "description": "Tiny MoonBit-native CLI that recursively embeds a folder into a .mbt file.",
+  "deps": {
+    "moonbitlang/x": "0.4.46"
+  }
+}
