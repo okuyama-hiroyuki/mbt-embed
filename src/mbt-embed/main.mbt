@@ -1,7 +1,7 @@
 ///|
 /// Usage shown when arguments are wrong.
 fn print_usage() -> Unit {
-  println("usage: embedgen <input_dir> [--package <name>]")
+  println("usage: mbt-embed <input_dir> [--package <name>]")
   println("  <input_dir>    folder to embed recursively")
   println("  --package <name>  optional, recorded as a header comment in")
   println("                   the generated file (e.g. myapp/assets)")
@@ -49,7 +49,7 @@ fn parse_args(args : Array[String]) -> Result[(String, String), String] {
 ///|
 /// Entry point.
 ///
-///   embedgen <input_dir> [--package <name>]
+///   mbt-embed <input_dir> [--package <name>]
 ///
 /// Reads `<input_dir>` recursively and writes the generated `.mbt` source to
 /// stdout, exposing the embedded bytes as `pub let entries : Map[String,
