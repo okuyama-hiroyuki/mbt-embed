@@ -27,12 +27,14 @@ moon build --target native src/embedgen
 
 ## Run it
 
+The generated `.mbt` source is always written to stdout; redirect it to a
+file yourself.
+
 ```
-moon run --target native src/embedgen -- <input_dir> <output_file> [--package <name>]
+moon run --target native src/embedgen -- <input_dir> [--package <name>] > <output_file>
 ```
 
 * `<input_dir>`  — folder to embed recursively (key = path relative to it).
-* `<output_file>` — generated `.mbt` path (e.g. `example/consume/embed_entries.mbt`).
 * `--package <name>` — emitted as a comment only; MoonBit does not need a
   per-file `package` directive, but it documents where the file belongs.
 
@@ -42,8 +44,8 @@ Empty files are supported (the entry is `Bytes::new(0)`).
 
 `moon` has no `pre-build` script hook, so do one of the following:
 
-* run `moon run` with the args above from a wrapper shell script / Makefile
-  target before `moon build`, or
+* run `moon run` with the args above, redirected to a file, from a wrapper
+  shell script / Makefile target before `moon build`, or
 * run the generator once and check in (or gitignore) the generated file.
 
 See `example/build.sh` for a minimal wrapper.

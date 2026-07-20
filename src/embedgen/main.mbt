@@ -1,11 +1,11 @@
 ///|
 /// Usage shown when arguments are wrong.
 fn print_usage() -> Unit {
-  println("usage: embedgen <input_dir> <output_file> [--package <name>]")
+  println("usage: embedgen <input_dir> [--package <name>]")
   println("  <input_dir>    folder to embed recursively")
-  println("  <output_file>  destination .mbt path")
   println("  --package <name>  optional, recorded as a header comment in")
   println("                   the generated file (e.g. myapp/assets)")
+  println("Generated MoonBit source is written to stdout.")
 }
 
 ///|
@@ -19,18 +19,17 @@ fn die(msg : String, code : Int) -> Unit {
 
 ///|
 /// Parse the part of argv after the program name into
-/// `(input_dir, output_file, package_hint)`. Flags may appear after the two
-/// positional arguments; the two positionals must come first.
+/// `(input_dir, package_hint)`. Flags may appear after the positional
+/// argument; the positional must come first.
 ///
 /// Returns a `Result` because errors are not exceptional at the CLI boundary.
-fn parse_args(args : Array[String]) -> Result[(String, String, String), String] {
-  if args.length() < 3 {
+fn parse_args(args : Array[String]) -> Result[(String, String), String] {
+  if args.length() < 2 {
     Err("not enough arguments")
   } else {
     let input_dir = args[1]
-    let output_file = args[2]
     let mut pkg = ""
-    let mut i = 3
+    let mut i = 2
     while i < args.length() {
       let a = args[i]
       if a == "--package" {
@@ -43,21 +42,21 @@ fn parse_args(args : Array[String]) -> Result[(String, String, String), String] 
         return Err("unknown argument: \{a}")
       }
     }
-    Ok((input_dir, output_file, pkg))
+    Ok((input_dir, pkg))
   }
 }
 
 ///|
 /// Entry point.
 ///
-///   embedgen <input_dir> <output_file> [--package <name>]
+///   embedgen <input_dir> [--package <name>]
 ///
-/// Reads `<input_dir>` recursively and writes a single `.mbt` file to
-/// `<output_file>` exposing the embedded bytes as `pub let entries :
-/// Map[String, Bytes]` and `pub fn get(String) -> Bytes?`.
+/// Reads `<input_dir>` recursively and writes the generated `.mbt` source to
+/// stdout, exposing the embedded bytes as `pub let entries : Map[String,
+/// Bytes]` and `pub fn get(String) -> Bytes?`.
 fn main {
   let args = @sys.get_cli_args()
-  let (input_dir, output_file, package_hint) = match parse_args(args) {
+  let (input_dir, package_hint) = match parse_args(args) {
     Ok(tup) => tup
     Err(msg) => {
       die(msg, 1)
@@ -75,18 +74,6 @@ fn main {
       abort("unreachable after sys.exit")
     }
   }
-  if entries.length() == 0 {
-    println("warning: no files embedded from \{input_dir}")
-  }
   let body = generate(entries, package_hint)
-  @fs.write_string_to_file(output_file, body) catch {
-    @fs.IOError(msg) => {
-      println("error writing \{output_file}: \{msg}")
-      @sys.exit(4)
-      abort("unreachable after sys.exit")
-    }
-  }
-  println(
-    "embedgen: wrote \{entries.length()} entries (\{body.length()} bytes) to \{output_file}",
-  )
+  println(body)
 }
