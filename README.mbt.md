@@ -40,10 +40,13 @@ moon run --target native src/mbt-embed -- <input_dir> <output_dir> [--package <n
 
 One file per embedded entry (`embed_0.mbt`, `embed_1.mbt`, ...) keeps any
 single generated file from growing with the number or size of embedded
-assets, plus a main `embed.mbt` holding `entries` and `get`. All files must
-live together in the same MoonBit package: the per-entry `_embed_N`
-functions have no `pub` and are only reachable from `embed.mbt` because
-MoonBit visibility is per-package, not per-file.
+assets, plus a main `embed.mbt` holding `entries` and `get`, plus a
+`moon.pkg` manifest (empty `import {}`, since the generated code never
+reaches outside the builtin prelude) so `<output_dir>` is a standalone
+MoonBit package on its own. All files must live together in the same
+MoonBit package: the per-entry `_embed_N` functions have no `pub` and are
+only reachable from `embed.mbt` because MoonBit visibility is per-package,
+not per-file.
 
 Empty files are supported (the entry is `_utf8_encode("")`).
 
