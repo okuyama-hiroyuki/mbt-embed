@@ -22,6 +22,11 @@ fn hex2(n : Int) -> String {
 /// Each 4096-byte chunk is emitted as a single `Bytes::from_array([...])`
 /// line concatenated with `+` (Bytes supports `Add`). Bounding the array
 /// literals keeps the generated file readable without a single mega-literal.
+/// The `+` must trail the line it continues from, not lead the next one:
+/// MoonBit's parser inserts an implicit statement break at a line start
+/// that isn't a continuation of an open bracket, so a leading `+` reads as
+/// an unrelated unbound `~+` reference rather than binding to the
+/// preceding `Bytes::from_array([...])`.
 fn emit_bytes_lit(bytes : Bytes, out : Array[String]) -> Unit {
   let len = bytes.length()
   if len == 0 {
@@ -29,15 +34,10 @@ fn emit_bytes_lit(bytes : Bytes, out : Array[String]) -> Unit {
     return
   }
   let mut i = 0
-  let mut first = true
   while i < len {
     let end = if i + CHUNK_SIZE < len { i + CHUNK_SIZE } else { len }
     let parts : Array[String] = []
-    parts.push("  ")
-    if !first {
-      parts.push("+ ")
-    }
-    parts.push("Bytes::from_array([")
+    parts.push("  Bytes::from_array([")
     let mut j = i
     while j < end {
       if j != i {
@@ -48,9 +48,11 @@ fn emit_bytes_lit(bytes : Bytes, out : Array[String]) -> Unit {
       j = j + 1
     }
     parts.push("])")
+    if end < len {
+      parts.push(" +")
+    }
     out.push(parts.join(""))
     i = end
-    first = false
   }
 }
 
