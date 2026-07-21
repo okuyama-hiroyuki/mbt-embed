@@ -28,11 +28,11 @@ moon build --target native src/mbt-embed
 ## Run it
 
 ```
-moon run --target native src/mbt-embed -- <input_dir> <output_file> [--package <name>]
+moon run --target native src/mbt-embed -- <input_dir> <output_dir> [--package <name>]
 ```
 
 * `<input_dir>`  — folder to embed recursively (key = path relative to it).
-* `<output_file>` — path the generated `.mbt` source is written to.
+* `<output_dir>` — existing directory the generated `embed.mbt` is written into.
 * `--package <name>` — emitted as a comment only; MoonBit does not need a
   per-file `package` directive, but it documents where the file belongs.
 
