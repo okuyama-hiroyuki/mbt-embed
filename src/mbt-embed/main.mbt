@@ -1,13 +1,9 @@
 ///|
-/// Name of the generated file written into `<output_dir>`.
-const OUTPUT_FILE_NAME : String = "embed.mbt"
-
-///|
 /// Usage shown when arguments are wrong.
 fn print_usage() -> Unit {
   println("usage: mbt-embed <input_dir> <output_dir> [--package <name>]")
   println("  <input_dir>   folder to embed recursively")
-  println("  <output_dir>  directory the generated \{OUTPUT_FILE_NAME} is written into")
+  println("  <output_dir>  directory the generated .mbt files are written into")
   println("  --package <name>  optional, recorded as a header comment in")
   println("                   the generated file (e.g. myapp/assets)")
 }
@@ -56,9 +52,10 @@ fn parse_args(args : Array[String]) -> Result[(String, String, String), String] 
 ///
 ///   mbt-embed <input_dir> <output_dir> [--package <name>]
 ///
-/// Reads `<input_dir>` recursively and writes the generated `.mbt` source to
-/// `<output_dir>/\{OUTPUT_FILE_NAME}`, exposing the embedded bytes as `pub let
-/// entries : Map[String, Bytes]` and `pub fn get(String) -> Bytes?`.
+/// Reads `<input_dir>` recursively and writes the generated `.mbt` sources
+/// into `<output_dir>` (one file per embedded entry, plus a main file),
+/// exposing the embedded bytes as `pub let entries : Map[String, Bytes]` and
+/// `pub fn get(String) -> Bytes?`.
 fn main {
   let args = @sys.get_cli_args()
   let (input_dir, output_dir, package_hint) = match parse_args(args) {
@@ -83,18 +80,21 @@ fn main {
       abort("unreachable after sys.exit")
     }
   }
-  let body = generate(entries, package_hint)
+  let files = generate_files(entries, package_hint)
   let trimmed_dir = if output_dir.has_suffix("/") {
     output_dir[:output_dir.length() - 1].to_owned()
   } else {
     output_dir
   }
-  let output_path = "\{trimmed_dir}/\{OUTPUT_FILE_NAME}"
-  @fs.write_string_to_file(output_path, body) catch {
-    @fs.IOError(msg) => {
-      println("error writing \{output_path}: \{msg}")
-      @sys.exit(4)
-      abort("unreachable after sys.exit")
+  for file in files {
+    let (file_name, content) = file
+    let output_path = "\{trimmed_dir}/\{file_name}"
+    @fs.write_string_to_file(output_path, content) catch {
+      @fs.IOError(msg) => {
+        println("error writing \{output_path}: \{msg}")
+        @sys.exit(4)
+        abort("unreachable after sys.exit")
+      }
     }
   }
 }
